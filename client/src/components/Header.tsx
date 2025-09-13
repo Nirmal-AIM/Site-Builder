@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Search, Menu, X, Code, Server, Database, GraduationCap, LogIn, UserPlus } from "lucide-react";
+import { Search, Menu, X, Code, Server, Database, GraduationCap, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
 
 type Section = "home" | "frontend" | "backend" | "database" | "learn";
 
@@ -19,6 +20,7 @@ export default function Header({
   onShowSignup 
 }: HeaderProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
 
   const navItems = [
     { id: "frontend" as Section, label: "Frontend", icon: Code },
@@ -85,23 +87,43 @@ export default function Header({
             </div>
             
             {/* User Buttons */}
-            <Button 
-              variant="outline" 
-              onClick={onShowLogin}
-              className="px-4 py-2 bg-transparent border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
-              data-testid="button-login"
-            >
-              <LogIn className="w-4 h-4 mr-1" />
-              Sign In
-            </Button>
-            <Button 
-              onClick={onShowSignup}
-              className="px-4 py-2 w3-green hover:bg-emerald-600 transition-colors"
-              data-testid="button-signup"
-            >
-              <UserPlus className="w-4 h-4 mr-1" />
-              Sign Up
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center text-white">
+                  <User className="w-4 h-4 mr-2" />
+                  <span className="text-sm">{user?.name}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={logout}
+                  className="px-4 py-2 bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={onShowLogin}
+                  className="px-4 py-2 bg-transparent border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                  data-testid="button-login"
+                >
+                  <LogIn className="w-4 h-4 mr-1" />
+                  Sign In
+                </Button>
+                <Button 
+                  onClick={onShowSignup}
+                  className="px-4 py-2 w3-green hover:bg-emerald-600 transition-colors"
+                  data-testid="button-signup"
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Sign Up
+                </Button>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
