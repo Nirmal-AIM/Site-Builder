@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-hero);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,7 +13,7 @@
 
 .loading-content {
   text-align: center;
-  color: white;
+  color: var(--text-inverse);
   max-width: 400px;
   padding: 2rem;
 }
@@ -38,9 +38,9 @@
   position: absolute;
   width: 20px;
   height: 20px;
-  background: #fff;
+  background: var(--neutral-50);
   border-radius: 50%;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-glow);
 }
 
 .node:nth-child(1) {
@@ -64,7 +64,7 @@
 
 .connection {
   position: absolute;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.8);
   animation: connectionPulse 2s ease-in-out infinite;
 }
 
@@ -88,7 +88,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  background: linear-gradient(45deg, #fff, #f0f8ff);
+  background: linear-gradient(45deg, var(--neutral-50), var(--primary-100), var(--secondary-100));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -112,10 +112,10 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #fff, #f0f8ff);
+  background: linear-gradient(90deg, var(--accent-400), var(--accent-300), var(--neutral-50));
   border-radius: 3px;
   transition: width 0.3s ease;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-glow);
 }
 
 .progress-text {
@@ -135,10 +135,10 @@
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    box-shadow: var(--shadow-glow);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow-glow-lg);
   }
 }
 
