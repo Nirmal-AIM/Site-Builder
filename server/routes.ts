@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, insertUserProgressSchema } from "@shared/schema";
+import { insertUserSchema, loginSchema, insertUserProgressSchema, insertUserAchievementSchema } from "@shared/schema";
 import bcryptjs from "bcryptjs";
 
 // Authentication middleware
@@ -43,9 +43,68 @@ const skillTrees = [
   },
 ];
 
+// Achievement definitions
+const achievements = [
+  {
+    id: "prompt-pioneer",
+    title: "Prompt Pioneer",
+    description: "Completed first prompting task",
+    condition: (userProgress: any[], userXP: number) => {
+      return userProgress.filter(p => p.completed).length >= 1;
+    }
+  },
+  {
+    id: "context-master",
+    title: "Context Master",
+    description: "Mastered context setting",
+    condition: (userProgress: any[], userXP: number) => {
+      return userProgress.some(p => p.completed && p.skillNode === "context-setting");
+    }
+  },
+  {
+    id: "consistent-prompter",
+    title: "Consistent Prompter",
+    description: "5-day prompting streak",
+    condition: (userProgress: any[], userXP: number) => {
+      return userProgress.filter(p => p.completed).length >= 3;
+    }
+  },
+  {
+    id: "ai-whisperer",
+    title: "AI Whisperer",
+    description: "Advanced technique expert",
+    condition: (userProgress: any[], userXP: number) => {
+      return userXP >= 1000;
+    }
+  },
+];
+
 // Calculate level from XP
 function calculateLevel(xp: number): number {
   return Math.floor(xp / 500) + 1;
+}
+
+// Check for new achievements
+async function checkAchievements(userId: string, userProgress: any[], userXP: number) {
+  const newAchievements = [];
+  const existingAchievements = await storage.getUserAchievements(userId);
+  const existingIds = new Set(existingAchievements.map(a => a.achievementId));
+  
+  for (const achievement of achievements) {
+    if (!existingIds.has(achievement.id) && achievement.condition(userProgress, userXP)) {
+      const newAchievement = await storage.addUserAchievement({
+        userId,
+        achievementId: achievement.id,
+      });
+      newAchievements.push({
+        ...newAchievement,
+        title: achievement.title,
+        description: achievement.description,
+      });
+    }
+  }
+  
+  return newAchievements;
 }
 
 // Get skill XP by path and node
@@ -185,11 +244,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             
             if (updatedUser) {
+              // Check for new achievements
+              const userProgress = await storage.getUserProgress(userId);
+              const newAchievements = await checkAchievements(userId, userProgress, newXP);
+              
               const { password, ...userResponse } = updatedUser;
               return res.json({
                 progress,
                 user: userResponse,
                 earnedXP: skillXP,
+                newAchievements,
               });
             }
           }
@@ -200,6 +264,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Progress update error:', error);
       res.status(400).json({ message: "Invalid progress data" });
+    }
+  });
+
+  // Achievement routes
+  app.get("/api/user/achievements", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const userAchievements = await storage.getUserAchievements(userId);
+      
+      // Add achievement details
+      const achievementsWithDetails = userAchievements.map(userAchievement => {
+        const achievementDef = achievements.find(a => a.id === userAchievement.achievementId);
+        return {
+          ...userAchievement,
+          title: achievementDef?.title || "Unknown Achievement",
+          description: achievementDef?.description || "Achievement description not found",
+        };
+      });
+      
+      res.json(achievementsWithDetails);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user achievements" });
     }
   });
 

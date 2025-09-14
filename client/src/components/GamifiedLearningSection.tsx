@@ -186,6 +186,12 @@ export default function GamifiedLearningSection() {
     enabled: isAuthenticated,
   });
 
+  // Get user achievements
+  const { data: userAchievements = [] } = useQuery<any[]>({
+    queryKey: ["/api/user/achievements"],
+    enabled: isAuthenticated,
+  });
+
   // Complete task mutation
   const completeTaskMutation = useMutation({
     mutationFn: async (data: { skillPath: string; skillNode: string }) => {
@@ -197,8 +203,9 @@ export default function GamifiedLearningSection() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Update user progress cache
+      // Update user progress and achievements cache
       queryClient.invalidateQueries({ queryKey: ["/api/user/progress"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/achievements"] });
       
       // If XP was earned, update the user data in auth context
       if (data.user && data.earnedXP) {
@@ -207,6 +214,16 @@ export default function GamifiedLearningSection() {
       
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 3000);
+      
+      // Show achievement notifications
+      if (data.newAchievements && data.newAchievements.length > 0) {
+        data.newAchievements.forEach((achievement: any) => {
+          toast({
+            title: `🏆 Achievement Unlocked!`,
+            description: `${achievement.title}: ${achievement.description}`,
+          });
+        });
+      }
       
       const message = data.earnedXP 
         ? `Great work! You've earned ${data.earnedXP} XP and unlocked new challenges.`
@@ -408,7 +425,7 @@ export default function GamifiedLearningSection() {
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {achievements.map((achievement) => {
                 const IconComponent = achievement.icon;
-                const earned = completedSkills >= 1; // Simple logic for now
+                const earned = userAchievements.some(ua => ua.achievementId === achievement.id);
                 return (
                   <Badge
                     key={achievement.id}

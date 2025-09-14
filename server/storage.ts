@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserProgress, type InsertUserProgress } from "@shared/schema";
+import { type User, type InsertUser, type UserProgress, type InsertUserProgress, type UserAchievement, type InsertUserAchievement } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -8,15 +8,19 @@ export interface IStorage {
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   getUserProgress(userId: string): Promise<UserProgress[]>;
   updateUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  addUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private userProgress: Map<string, UserProgress>;
+  private userAchievements: Map<string, UserAchievement>;
 
   constructor() {
     this.users = new Map();
     this.userProgress = new Map();
+    this.userAchievements = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -94,6 +98,34 @@ export class MemStorage implements IStorage {
       this.userProgress.set(id, progress);
       return progress;
     }
+  }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return Array.from(this.userAchievements.values()).filter(
+      (achievement) => achievement.userId === userId,
+    );
+  }
+
+  async addUserAchievement(insertAchievement: InsertUserAchievement): Promise<UserAchievement> {
+    // Check if achievement already exists
+    const existing = Array.from(this.userAchievements.values()).find(
+      (achievement) => 
+        achievement.userId === insertAchievement.userId && 
+        achievement.achievementId === insertAchievement.achievementId
+    );
+    
+    if (existing) {
+      return existing; // Return existing achievement if already earned
+    }
+
+    const id = randomUUID();
+    const achievement: UserAchievement = {
+      ...insertAchievement,
+      id,
+      earnedAt: new Date(),
+    };
+    this.userAchievements.set(id, achievement);
+    return achievement;
   }
 }
 
