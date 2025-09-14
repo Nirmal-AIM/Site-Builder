@@ -288,3 +288,4 @@ export default function GamifiedLearningSection() {
       </div>
     </section>
   );
+}
