@@ -32,11 +32,11 @@ export default function Header({
 
   return (
     <header className="w3-dark shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Main Navigation */}
-        <nav className="flex items-center justify-between px-4 py-3">
+        <nav className="flex items-center justify-between px-0 py-3 w-full">
           {/* Logo */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center flex-shrink-0 pl-6">
             <button 
               onClick={() => onSectionChange("home")}
               className="text-2xl font-bold text-white hover:text-primary transition-colors"
@@ -48,7 +48,7 @@ export default function Header({
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-3 flex-1 justify-center">
             {navItems.map((item) => {
               const IconComponent = item.icon;
               return (
@@ -68,9 +68,9 @@ export default function Header({
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4 pr-6">
             {/* Search */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center space-x-2">
               <Input 
                 type="search" 
                 placeholder="Search tutorials, e.g. React" 
@@ -138,17 +138,21 @@ export default function Header({
         </nav>
 
         {/* Secondary Navigation */}
-        <div className="border-t border-slate-600 px-4 py-2 overflow-x-auto">
-          <div className="flex space-x-6 text-sm">
+        <div className="border-t border-slate-600 px-0 py-2 overflow-x-auto">
+          <div className="flex space-x-6 text-sm px-6">
             {[
-              "HTML", 
-              "CSS", 
-              "JAVASCRIPT", 
-              "REACT", 
-              "NODE.JS", 
-              "PYTHON", 
-              "SQL", 
-              "AI PROMPTS"
+              "Landing Pages", 
+              "personal Websites", 
+              "Blog", 
+              "Contact Forms", 
+              "Custom Page Builder", 
+              "E-commerce", 
+              "Web Sites", 
+              "AI PROMPTS",
+              "Image Generation",
+              "Code Generation",
+              "Video Generation",
+              "Explore Prompts"
             ].map((tech) => (
               <button
                 key={tech}
