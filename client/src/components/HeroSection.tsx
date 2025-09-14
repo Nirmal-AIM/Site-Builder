@@ -131,6 +131,11 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
           })}
         </div>
       </div>
+      <footer className="bg-white py-4 mt-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <span>© 2025 Prompty. All rights reserved.</span>
+        </div>
+      </footer>
     </section>
   );
 }
