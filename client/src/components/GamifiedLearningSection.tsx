@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trophy, Medal, Star, Code, Clock, GraduationCap, Check, Play, Lock, Target, BookOpen, ChevronRight, Sparkles } from "lucide-react";
+import { Trophy, Medal, Star, Code, Clock, GraduationCap, Check, Play, Lock, Target, BookOpen, ChevronRight, Sparkles, Globe, Smartphone, Database, Brain, Palette, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,128 +10,338 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { UserProgress, UserAchievement } from "@shared/schema";
 
-const skillTrees = [
-  {
-    id: "prompting-basics",
-    title: "Prompting Fundamentals",
-    icon: "fas fa-comment-dots",
-    iconColor: "text-blue-500",
-    skills: [
-      { 
-        name: "Prompt Structure", 
-        xp: 100, 
-        status: "current",
-        description: "Learn the anatomy of effective prompts",
-        task: "Write a clear, specific prompt to get a recipe for chocolate chip cookies. Include the desired output format and any constraints.",
-        example: "Create a simple recipe for chocolate chip cookies with exactly 6 ingredients, formatted as a numbered list with prep time included."
-      },
-      { 
-        name: "Context Setting", 
-        xp: 150, 
-        status: "locked",
-        description: "Master the art of providing context",
-        task: "Create a prompt that sets clear context for writing a professional email to decline a job offer politely.",
-        example: "You are a professional communicator. Write a polite email declining a software engineer position at TechCorp, mentioning you've accepted another opportunity."
-      },
-      { 
-        name: "Clear Instructions", 
-        xp: 200, 
-        status: "locked",
-        description: "Give precise, actionable instructions",
-        task: "Write a prompt to explain quantum computing to a 10-year-old using only simple analogies and no technical jargon.",
-        example: "Explain quantum computing to a 10-year-old using only everyday objects as analogies. Keep it under 100 words and make it fun."
-      },
-      { 
-        name: "Output Formatting", 
-        xp: 250, 
-        status: "locked",
-        description: "Control how responses are structured",
-        task: "Create a prompt that generates a comparison table between cats and dogs with exactly 5 characteristics.",
-        example: "Create a comparison table between cats and dogs. Include exactly 5 characteristics: independence, energy level, grooming needs, space requirements, and training difficulty. Format as a markdown table."
-      },
-    ],
-  },
-  {
-    id: "advanced-techniques", 
-    title: "Advanced Techniques",
-    icon: "fas fa-brain",
+const allSkillTreeCategories = {
+  "ai-prompting": {
+    title: "AI & Prompting",
+    icon: Brain,
     iconColor: "text-purple-500",
-    skills: [
-      { 
-        name: "Role-Based Prompting", 
-        xp: 200, 
-        status: "locked",
-        description: "Use personas and roles for better responses",
-        task: "Create a prompt where the AI acts as a financial advisor explaining investment strategies to a college student.",
-        example: "You are an experienced financial advisor. Explain 3 basic investment strategies suitable for a college student with $500 to invest. Be encouraging and use simple terms."
+    trees: [
+      {
+        id: "prompting-basics",
+        title: "Prompting Fundamentals",
+        icon: Brain,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "Prompt Structure", 
+            xp: 100, 
+            description: "Learn the anatomy of effective prompts",
+            task: "Write a clear, specific prompt to get a recipe for chocolate chip cookies. Include the desired output format and any constraints.",
+            example: "Create a simple recipe for chocolate chip cookies with exactly 6 ingredients, formatted as a numbered list with prep time included."
+          },
+          { 
+            name: "Context Setting", 
+            xp: 150, 
+            description: "Master the art of providing context",
+            task: "Create a prompt that sets clear context for writing a professional email to decline a job offer politely.",
+            example: "You are a professional communicator. Write a polite email declining a software engineer position at TechCorp, mentioning you've accepted another opportunity."
+          },
+          { 
+            name: "Clear Instructions", 
+            xp: 200, 
+            description: "Give precise, actionable instructions",
+            task: "Write a prompt to explain quantum computing to a 10-year-old using only simple analogies and no technical jargon.",
+            example: "Explain quantum computing to a 10-year-old using only everyday objects as analogies. Keep it under 100 words and make it fun."
+          },
+          { 
+            name: "Output Formatting", 
+            xp: 250, 
+            description: "Control how responses are structured",
+            task: "Create a prompt that generates a comparison table between cats and dogs with exactly 5 characteristics.",
+            example: "Create a comparison table between cats and dogs. Include exactly 5 characteristics: independence, energy level, grooming needs, space requirements, and training difficulty. Format as a markdown table."
+          },
+        ],
       },
-      { 
-        name: "Chain of Thought", 
-        xp: 300, 
-        status: "locked",
-        description: "Guide AI through step-by-step reasoning",
-        task: "Write a prompt that guides the AI through solving a math word problem step by step.",
-        example: "Solve this step by step: 'A store offers 20% off all items. If a jacket costs $80 after the discount, what was the original price?' Show each calculation step clearly."
+      {
+        id: "advanced-techniques", 
+        title: "Advanced Techniques",
+        icon: Star,
+        iconColor: "text-purple-500",
+        skills: [
+          { 
+            name: "Role-Based Prompting", 
+            xp: 200, 
+            description: "Use personas and roles for better responses",
+            task: "Create a prompt where the AI acts as a financial advisor explaining investment strategies to a college student.",
+            example: "You are an experienced financial advisor. Explain 3 basic investment strategies suitable for a college student with $500 to invest. Be encouraging and use simple terms."
+          },
+          { 
+            name: "Chain of Thought", 
+            xp: 300, 
+            description: "Guide AI through step-by-step reasoning",
+            task: "Write a prompt that guides the AI through solving a math word problem step by step.",
+            example: "Solve this step by step: 'A store offers 20% off all items. If a jacket costs $80 after the discount, what was the original price?' Show each calculation step clearly."
+          },
+          { 
+            name: "Few-Shot Learning", 
+            xp: 350, 
+            description: "Provide examples to guide responses",
+            task: "Create a prompt with 2 examples that teaches the AI to write product descriptions in a specific style.",
+            example: "Write product descriptions in this style:\n\nExample 1: Coffee Mug - 'Start your day right with this ceramic companion that holds your liquid motivation.'\n\nExample 2: Notebook - 'Capture your thoughts in this paper sanctuary where ideas come to life.'\n\nNow write a description for: Wireless Headphones"
+          },
+          { 
+            name: "Constraint Handling", 
+            xp: 400, 
+            description: "Work within specific limitations effectively",
+            task: "Write a prompt that asks for a story in exactly 50 words with specific character and setting constraints.",
+            example: "Write a story in exactly 50 words featuring a detective, a missing cat, and a library setting. Include a plot twist and ensure the story has a complete beginning, middle, and end."
+          },
+        ],
       },
-      { 
-        name: "Few-Shot Learning", 
-        xp: 350, 
-        status: "locked",
-        description: "Provide examples to guide responses",
-        task: "Create a prompt with 2 examples that teaches the AI to write product descriptions in a specific style.",
-        example: "Write product descriptions in this style:\n\nExample 1: Coffee Mug - 'Start your day right with this ceramic companion that holds your liquid motivation.'\n\nExample 2: Notebook - 'Capture your thoughts in this paper sanctuary where ideas come to life.'\n\nNow write a description for: Wireless Headphones"
-      },
-      { 
-        name: "Constraint Handling", 
-        xp: 400, 
-        status: "locked",
-        description: "Work within specific limitations effectively",
-        task: "Write a prompt that asks for a story in exactly 50 words with specific character and setting constraints.",
-        example: "Write a story in exactly 50 words featuring a detective, a missing cat, and a library setting. Include a plot twist and ensure the story has a complete beginning, middle, and end."
-      },
-    ],
+    ]
   },
-  {
-    id: "specialized-prompting",
-    title: "Specialized Applications", 
-    icon: "fas fa-rocket",
+  "web-development": {
+    title: "Web Development",
+    icon: Globe,
+    iconColor: "text-green-500",
+    trees: [
+      {
+        id: "frontend-basics",
+        title: "Frontend Fundamentals",
+        icon: Code,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "HTML Basics", 
+            xp: 100, 
+            description: "Learn HTML structure and semantic elements",
+            task: "Create a semantic HTML page with header, nav, main, section, and footer elements for a portfolio website.",
+            example: "Build a portfolio homepage with proper HTML5 semantic structure including navigation menu, hero section, and contact form."
+          },
+          { 
+            name: "CSS Styling", 
+            xp: 150, 
+            description: "Master CSS for layout and design",
+            task: "Style a responsive card component using CSS Grid and Flexbox with hover effects.",
+            example: "Create a product card with image, title, description, and price that looks good on both desktop and mobile."
+          },
+          { 
+            name: "JavaScript Fundamentals", 
+            xp: 200, 
+            description: "Learn JavaScript basics and DOM manipulation",
+            task: "Build an interactive to-do list with add, delete, and mark complete functionality using vanilla JavaScript.",
+            example: "Create a to-do app that saves items to localStorage and has filtering options (all, active, completed)."
+          },
+          { 
+            name: "Responsive Design", 
+            xp: 250, 
+            description: "Create layouts that work on all devices",
+            task: "Build a responsive navigation that becomes a hamburger menu on mobile devices.",
+            example: "Design a navigation bar that collapses to a hamburger menu below 768px width with smooth animations."
+          },
+        ],
+      },
+      {
+        id: "frontend-frameworks",
+        title: "Frontend Frameworks",
+        icon: Star,
+        iconColor: "text-green-500",
+        skills: [
+          { 
+            name: "React Basics", 
+            xp: 200, 
+            description: "Learn React components and state management",
+            task: "Build a counter app with increment, decrement, and reset functionality using React hooks.",
+            example: "Create a React component that manages counter state and displays the value with styled buttons."
+          },
+          { 
+            name: "React Hooks", 
+            xp: 300, 
+            description: "Master useState, useEffect, and custom hooks",
+            task: "Build a weather app that fetches data from an API and updates every 5 minutes using useEffect.",
+            example: "Create a weather widget that shows current conditions and auto-refreshes, with loading and error states."
+          },
+          { 
+            name: "State Management", 
+            xp: 350, 
+            description: "Learn Redux or Context API for complex state",
+            task: "Build a shopping cart with add/remove items, quantity updates, and total calculation using context.",
+            example: "Create a global shopping cart state that persists across page navigations in a React app."
+          },
+          { 
+            name: "Component Libraries", 
+            xp: 400, 
+            description: "Use UI libraries like Material-UI or Chakra UI",
+            task: "Build a dashboard with charts, tables, and forms using a component library of your choice.",
+            example: "Create an admin dashboard with data visualization and form components using Material-UI or similar."
+          },
+        ],
+      },
+    ]
+  },
+  "mobile-development": {
+    title: "Mobile Development",
+    icon: Smartphone,
+    iconColor: "text-indigo-500",
+    trees: [
+      {
+        id: "react-native",
+        title: "React Native",
+        icon: Smartphone,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "React Native Basics", 
+            xp: 100, 
+            description: "Learn mobile app structure and components",
+            task: "Build a simple 'Hello World' app with navigation between two screens.",
+            example: "Create a mobile app with a welcome screen and a profile screen using React Native navigation."
+          },
+          { 
+            name: "Mobile UI Components", 
+            xp: 150, 
+            description: "Master mobile-specific UI elements",
+            task: "Build a contact list with search functionality and swipe-to-delete actions.",
+            example: "Create a contacts app with FlatList, SearchBar, and SwipeRow components for mobile interactions."
+          },
+          { 
+            name: "Device Features", 
+            xp: 200, 
+            description: "Access camera, GPS, and device sensors",
+            task: "Build a photo gallery app that can take pictures and access device location.",
+            example: "Create an app that captures photos, tags them with GPS coordinates, and displays them in a grid."
+          },
+          { 
+            name: "App Store Deployment", 
+            xp: 250, 
+            description: "Prepare and publish mobile apps",
+            task: "Package and prepare a React Native app for iOS App Store or Google Play Store submission.",
+            example: "Configure app icons, splash screens, and build signed APK/IPA files for store deployment."
+          },
+        ],
+      },
+    ]
+  },
+  "data-science": {
+    title: "Data Science",
+    icon: Database,
     iconColor: "text-orange-500",
-    skills: [
-      { 
-        name: "Creative Writing", 
-        xp: 250, 
-        status: "locked",
-        description: "Prompts for creative and artistic content",
-        task: "Create a prompt for writing a short story that includes specific mood, setting, and style requirements.",
-        example: "Write a mysterious short story set in a 1940s jazz club. Use a noir style with descriptive language. Include a saxophone player, a secret message, and an unexpected revelation. Keep it under 300 words."
+    trees: [
+      {
+        id: "python-data",
+        title: "Python for Data Science",
+        icon: Database,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "Pandas Basics", 
+            xp: 100, 
+            description: "Learn data manipulation with pandas",
+            task: "Load a CSV dataset and perform basic data cleaning and exploration using pandas.",
+            example: "Import sales data, handle missing values, and calculate summary statistics using pandas DataFrame."
+          },
+          { 
+            name: "Data Visualization", 
+            xp: 150, 
+            description: "Create charts and graphs with matplotlib/seaborn",
+            task: "Create a dashboard with bar charts, line plots, and scatter plots from a dataset.",
+            example: "Build visualizations showing sales trends, customer demographics, and product performance metrics."
+          },
+          { 
+            name: "Statistical Analysis", 
+            xp: 200, 
+            description: "Perform statistical tests and analysis",
+            task: "Conduct hypothesis testing and correlation analysis on a business dataset.",
+            example: "Analyze customer data to find significant relationships between demographics and purchasing behavior."
+          },
+          { 
+            name: "Machine Learning", 
+            xp: 250, 
+            description: "Build predictive models with scikit-learn",
+            task: "Train a machine learning model to predict customer churn or sales forecasting.",
+            example: "Create a classification model to predict customer retention using historical transaction data."
+          },
+        ],
       },
-      { 
-        name: "Data Analysis", 
-        xp: 300, 
-        status: "locked",
-        description: "Extract insights from data and information",
-        task: "Write a prompt to analyze survey data and provide actionable business insights.",
-        example: "Analyze this customer survey data: 70% want faster delivery, 45% want better packaging, 30% want lower prices. Identify the top 3 priorities and suggest specific improvements a startup should implement first."
-      },
-      { 
-        name: "Code Generation", 
-        xp: 350, 
-        status: "locked",
-        description: "Generate and explain code effectively",
-        task: "Create a prompt for generating a Python function with specific requirements and documentation.",
-        example: "Write a Python function that calculates compound interest. Include parameters for principal, rate, time, and compounding frequency. Add docstring documentation and example usage. Handle edge cases like negative values."
-      },
-      { 
-        name: "Research & Synthesis", 
-        xp: 400, 
-        status: "locked",
-        description: "Combine information from multiple sources",
-        task: "Write a prompt that synthesizes information about renewable energy trends and creates an executive summary.",
-        example: "Create an executive summary on renewable energy trends for 2024. Synthesize key points about solar, wind, and battery technology advances. Include 3 main opportunities and 2 challenges. Format for a CEO audience, max 200 words."
-      },
-    ],
+    ]
   },
-];
+  "design": {
+    title: "UI/UX Design",
+    icon: Palette,
+    iconColor: "text-pink-500",
+    trees: [
+      {
+        id: "ui-design",
+        title: "UI Design Fundamentals",
+        icon: Palette,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "Design Principles", 
+            xp: 100, 
+            description: "Learn color theory, typography, and layout",
+            task: "Create a style guide with color palette, typography scale, and spacing system.",
+            example: "Design a brand style guide with primary/secondary colors, font hierarchy, and component spacing rules."
+          },
+          { 
+            name: "Wireframing", 
+            xp: 150, 
+            description: "Create low-fidelity layouts and user flows",
+            task: "Design wireframes for a mobile e-commerce app checkout process.",
+            example: "Create wireframes showing the user journey from product selection to payment completion."
+          },
+          { 
+            name: "Prototyping", 
+            xp: 200, 
+            description: "Build interactive prototypes with tools like Figma",
+            task: "Create a clickable prototype for a social media app with navigation and interactions.",
+            example: "Build an interactive prototype showing user onboarding flow with animations and transitions."
+          },
+          { 
+            name: "Design Systems", 
+            xp: 250, 
+            description: "Create reusable component libraries",
+            task: "Build a complete design system with buttons, forms, and navigation components.",
+            example: "Design a component library with consistent styling, states, and documentation for development handoff."
+          },
+        ],
+      },
+    ]
+  },
+  "backend-development": {
+    title: "Backend Development",
+    icon: Server,
+    iconColor: "text-gray-500",
+    trees: [
+      {
+        id: "api-development",
+        title: "API Development",
+        icon: Server,
+        iconColor: "text-blue-500",
+        skills: [
+          { 
+            name: "REST APIs", 
+            xp: 100, 
+            description: "Build RESTful web services",
+            task: "Create a REST API for a blog with CRUD operations for posts and comments.",
+            example: "Build an Express.js API with GET, POST, PUT, DELETE endpoints for managing blog content."
+          },
+          { 
+            name: "Database Design", 
+            xp: 150, 
+            description: "Design efficient database schemas",
+            task: "Design a database schema for an e-commerce platform with users, products, and orders.",
+            example: "Create normalized tables with proper relationships, indexes, and constraints for an online store."
+          },
+          { 
+            name: "Authentication", 
+            xp: 200, 
+            description: "Implement secure user authentication",
+            task: "Build a user authentication system with JWT tokens and password hashing.",
+            example: "Create login/register endpoints with bcrypt password hashing and JWT-based session management."
+          },
+          { 
+            name: "API Security", 
+            xp: 250, 
+            description: "Secure APIs with rate limiting and validation",
+            task: "Implement rate limiting, input validation, and CORS policies for an API.",
+            example: "Add security middleware for API protection including request validation and abuse prevention."
+          },
+        ],
+      },
+    ]
+  }
+};
 
 const achievements = [
   {
@@ -188,6 +398,7 @@ export default function GamifiedLearningSection() {
   const [offlineAchievements, setOfflineAchievements] = useState<UserAchievement[]>([]);
   const [offlineUser, setOfflineUser] = useState<any>(null);
   const [isUsingOfflineData, setIsUsingOfflineData] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("ai-prompting");
 
   // Get user progress (now uses session-based auth)
   const { data: userProgress = [], isError: progressError } = useQuery<UserProgress[]>({
@@ -249,13 +460,16 @@ export default function GamifiedLearningSection() {
     }
   }, [isAuthenticated, progressError, user]);
 
+  // Get current skill trees for selected category
+  const skillTrees = allSkillTreeCategories[selectedCategory as keyof typeof allSkillTreeCategories]?.trees || [];
+
   // Detect newly unlocked skills
   useEffect(() => {
-    if (userProgress.length > 0 && previousProgress.length > 0) {
+    if (userProgress.length > 0 && previousProgress.length > 0 && skillTrees.length > 0) {
       const newlyUnlocked: string[] = [];
       
       skillTrees.forEach(tree => {
-        tree.skills.forEach((skill, index) => {
+        tree.skills.forEach((skill: any, index: number) => {
           if (index > 0) { // Skip first skill as it's always unlocked
             const skillKey = `${tree.id}-${skill.name}`;
             const wasLocked = getSkillStatus(tree.id, skill.name, previousProgress) === "locked";
@@ -273,8 +487,11 @@ export default function GamifiedLearningSection() {
         setTimeout(() => setNewlyUnlockedSkills([]), 3000);
       }
     }
-    setPreviousProgress(userProgress);
-  }, [userProgress]);
+    
+    if (userProgress.length >= 0) { // Only update if userProgress is available
+      setPreviousProgress(userProgress);
+    }
+  }, [userProgress, selectedCategory]); // Add selectedCategory as dependency
 
   // Complete task mutation
   const completeTaskMutation = useMutation({
@@ -382,7 +599,7 @@ export default function GamifiedLearningSection() {
   const totalXP = currentUser?.xp || 0;
 
   const completedSkills = currentProgress.filter(p => p.completed).length;
-  const totalSkills = skillTrees.reduce((total, tree) => total + tree.skills.length, 0);
+  const totalSkills = skillTrees.reduce((total: number, tree: any) => total + tree.skills.length, 0);
   const progressPercentage = totalSkills > 0 ? (completedSkills / totalSkills) * 100 : 0;
 
   const handleStartTask = (treeId: string, skillName: string) => {
@@ -492,9 +709,33 @@ export default function GamifiedLearningSection() {
             <GraduationCap className="inline w-10 h-10 text-green-500 mr-3" />
             Gamified Learning
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 mb-8">
             Level up your skills with interactive challenges, skill trees, and rewards
           </p>
+
+          {/* Category Navigation */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {Object.entries(allSkillTreeCategories).map(([categoryKey, category]) => {
+              const IconComponent = category.icon;
+              const isActive = selectedCategory === categoryKey;
+              return (
+                <Button
+                  key={categoryKey}
+                  variant={isActive ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(categoryKey)}
+                  className={`flex items-center gap-2 transition-all duration-200 ${
+                    isActive 
+                      ? "bg-primary text-primary-foreground transform scale-105 shadow-lg" 
+                      : "hover:scale-105"
+                  }`}
+                  data-testid={`category-${categoryKey}`}
+                >
+                  <IconComponent className={`w-4 h-4 ${isActive ? "text-white" : category.iconColor}`} />
+                  {category.title}
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         {/* User Progress */}
