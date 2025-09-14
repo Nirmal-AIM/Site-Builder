@@ -57,12 +57,12 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-md fade-in" data-testid="modal-login">
+      <DialogContent className="w-full max-w-md mx-4 fade-in" data-testid="modal-login">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900">Sign In</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">Sign In</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           <div>
             <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -72,7 +72,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
               type="email" 
               {...form.register("email")}
               placeholder="Enter your email"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-login-email"
             />
             {form.formState.errors.email && (
@@ -91,7 +91,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
               type="password" 
               {...form.register("password")}
               placeholder="Enter your password"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-login-password"
             />
             {form.formState.errors.password && (
@@ -101,10 +101,10 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
             )}
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
             <div className="flex items-center space-x-2">
               <Checkbox id="remember" />
-              <Label htmlFor="remember" className="text-sm text-gray-600">
+              <Label htmlFor="remember" className="text-xs sm:text-sm text-gray-600">
                 Remember me
               </Label>
             </div>
@@ -120,7 +120,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
           <Button 
             type="submit" 
             disabled={loginMutation.isPending}
-            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-emerald-600 transition-colors"
+            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-emerald-600 transition-colors text-sm sm:text-base"
             data-testid="button-login-submit"
           >
             {loginMutation.isPending ? "Signing In..." : "Sign In"}
@@ -128,7 +128,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
         </form>
         
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Don't have an account?{" "}
             <button 
               onClick={onSwitchToSignup}

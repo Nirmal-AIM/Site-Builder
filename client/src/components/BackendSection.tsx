@@ -90,41 +90,41 @@ const backendCards = [
 
 export default function BackendSection() {
   return (
-    <section className="py-16 w3-light-grey">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+    <section className="py-8 sm:py-12 lg:py-16 w3-light-grey">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             <i className="fas fa-server text-blue-500 mr-3"></i>
             Backend AI Prompts
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Build robust APIs, server logic, and application architecture with AI guidance
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {backendCards.map((card) => {
             const IconComponent = card.icon;
             return (
               <div 
                 key={card.id}
-                className="bg-white rounded-lg border p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg border p-4 sm:p-6 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                 data-testid={`card-backend-${card.id}`}
               >
-                <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center mr-4`}>
+                <div className="flex items-center mb-3 sm:mb-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${card.bgColor} rounded-lg flex items-center justify-center mr-3 sm:mr-4`}>
                     <IconComponent className={`${card.iconColor}`} size={24} />
                   </div>
-                  <h3 className="text-xl font-semibold">{card.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">{card.title}</h3>
                 </div>
-                <p className="text-gray-600 mb-4">{card.description}</p>
-                <ul className="space-y-2 text-sm text-gray-500 mb-4">
+                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{card.description}</p>
+                <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
                   {card.features.map((feature, index) => (
                     <li key={index}>{feature}</li>
                   ))}
                 </ul>
                 <Button 
-                  className="w-full bg-primary text-white py-2 rounded hover:bg-emerald-600 transition-colors"
+                  className="w-full bg-primary text-white py-2 rounded hover:bg-emerald-600 transition-colors text-sm sm:text-base"
                   data-testid={`button-generate-${card.id}`}
                 >
                   Generate Prompt

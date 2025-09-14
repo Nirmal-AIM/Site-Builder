@@ -68,12 +68,12 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-md fade-in" data-testid="modal-signup">
+      <DialogContent className="w-full max-w-md mx-4 fade-in" data-testid="modal-signup">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900">Sign Up</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">Sign Up</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           <div>
             <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Full Name
@@ -83,7 +83,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               type="text" 
               {...form.register("name")}
               placeholder="Enter your full name"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-signup-name"
             />
             {form.formState.errors.name && (
@@ -102,7 +102,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               type="email" 
               {...form.register("email")}
               placeholder="Enter your email"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-signup-email"
             />
             {form.formState.errors.email && (
@@ -121,7 +121,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               type="password" 
               {...form.register("password")}
               placeholder="Create a password"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-signup-password"
             />
             {form.formState.errors.password && (
@@ -140,7 +140,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               type="password" 
               {...form.register("confirmPassword")}
               placeholder="Confirm your password"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               data-testid="input-signup-confirm-password"
             />
             {form.formState.errors.confirmPassword && (
@@ -150,9 +150,9 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
             )}
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-start space-x-2">
             <Checkbox id="terms" required />
-            <Label htmlFor="terms" className="text-sm text-gray-600">
+            <Label htmlFor="terms" className="text-xs sm:text-sm text-gray-600 leading-tight">
               I agree to the Terms of Service and Privacy Policy
             </Label>
           </div>
@@ -160,7 +160,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
           <Button 
             type="submit" 
             disabled={signupMutation.isPending}
-            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-emerald-600 transition-colors"
+            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-emerald-600 transition-colors text-sm sm:text-base"
             data-testid="button-signup-submit"
           >
             {signupMutation.isPending ? "Creating Account..." : "Create Account"}
@@ -168,7 +168,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
         </form>
         
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Already have an account?{" "}
             <button 
               onClick={onSwitchToLogin}

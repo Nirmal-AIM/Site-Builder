@@ -97,14 +97,14 @@ if __name__ == '__main__':
       case "learn":
         return <GamifiedLearningSection />;
       case "prompts":
-        return <PromptsSection />; // Show PromptsSection on /prompts
+        return <PromptsSection />;
       default:
         return <HeroSection onSectionChange={setCurrentSection} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
       <Header 
         currentSection={currentSection}
         onSectionChange={setCurrentSection}
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         {renderSection()}
 
         {currentSection === "home" && (
-          <PromptsSection /> // Show PromptsSection on home page too
+          <PromptsSection />
         )}
       </main>
 

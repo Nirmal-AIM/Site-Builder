@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, loginSchema } from "@shared/schema";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -17,7 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const hashedPassword = await bcryptjs.hash(userData.password, 10);
       
       const user = await storage.createUser({
         ...userData,
@@ -41,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const isValidPassword = await bcrypt.compare(loginData.password, user.password);
+      const isValidPassword = await bcryptjs.compare(loginData.password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
