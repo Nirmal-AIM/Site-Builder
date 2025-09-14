@@ -56,9 +56,16 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
     <section className="w3-light-grey py-16">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-green-600 mb-6">
-            DON'T CODE, WEBSITES MADE FORM THE WORDS!!
-            </h1>
+            <h1
+  className="text-5xl font-bold mb-6
+    text-transparent bg-clip-text
+    bg-gradient-to-br from-green-600 via-green-500 to-green-900
+    drop-shadow-lg shadow-black/60
+    dark:from-green-400 dark:via-green-300 dark:to-green-700
+    dark:drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+>
+  DON'T CODE, WEBSITES MADE FROM THE WORDS!
+</h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             The platform for building complete websites using AI prompts. 
             From frontend to backend, learn and build with structured guidance.
