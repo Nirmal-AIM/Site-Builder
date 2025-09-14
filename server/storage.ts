@@ -58,15 +58,42 @@ export class MemStorage implements IStorage {
   }
 
   async updateUserProgress(insertProgress: InsertUserProgress): Promise<UserProgress> {
-    const id = randomUUID();
-    const progress: UserProgress = {
-      ...insertProgress,
-      id,
-      completed: insertProgress.completed ?? false,
-      completedAt: insertProgress.completed ? new Date() : null,
-    };
-    this.userProgress.set(id, progress);
-    return progress;
+    // Find existing progress for this user and skill combination
+    const existingProgress = Array.from(this.userProgress.values()).find(
+      (progress) => 
+        progress.userId === insertProgress.userId && 
+        progress.skillPath === insertProgress.skillPath &&
+        progress.skillNode === insertProgress.skillNode
+    );
+
+    if (existingProgress) {
+      // Update existing progress entry, preserving existing values when not provided
+      const completed = insertProgress.completed ?? existingProgress.completed;
+      const completedAt = insertProgress.completed === true && !existingProgress.completed 
+        ? new Date() 
+        : insertProgress.completed === false 
+          ? null 
+          : existingProgress.completedAt;
+      
+      const updatedProgress: UserProgress = {
+        ...existingProgress,
+        completed,
+        completedAt,
+      };
+      this.userProgress.set(existingProgress.id, updatedProgress);
+      return updatedProgress;
+    } else {
+      // Create new progress entry
+      const id = randomUUID();
+      const progress: UserProgress = {
+        ...insertProgress,
+        id,
+        completed: insertProgress.completed ?? false,
+        completedAt: insertProgress.completed ? new Date() : null,
+      };
+      this.userProgress.set(id, progress);
+      return progress;
+    }
   }
 }
 

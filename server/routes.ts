@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema } from "@shared/schema";
+import { insertUserSchema, loginSchema, insertUserProgressSchema } from "@shared/schema";
 import bcryptjs from "bcryptjs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -66,10 +66,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/user/progress", async (req, res) => {
     try {
-      const progress = await storage.updateUserProgress(req.body);
+      const progressData = insertUserProgressSchema.parse(req.body);
+      const progress = await storage.updateUserProgress(progressData);
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update progress" });
+      res.status(400).json({ message: "Invalid progress data" });
     }
   });
 
