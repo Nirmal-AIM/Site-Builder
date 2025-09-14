@@ -1,99 +1,133 @@
-import { Trophy, Medal, Star, Code, Clock, GraduationCap, Check, Play, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Trophy, Medal, Star, Code, Clock, GraduationCap, Check, Play, Lock, Target, BookOpen, ChevronRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { UserProgress } from "@shared/schema";
 
 const skillTrees = [
   {
-    id: "frontend",
-    title: "Frontend Path",
-    icon: "fab fa-html5",
-    iconColor: "text-orange-500",
-    skills: [
-      { 
-        name: "HTML Basics", 
-        xp: 100, 
-        status: "completed",
-        description: "Learn HTML structure and elements"
-      },
-      { 
-        name: "CSS Styling", 
-        xp: 150, 
-        status: "completed",
-        description: "Master CSS styling and layouts"
-      },
-      { 
-        name: "JavaScript ES6", 
-        xp: 200, 
-        status: "current",
-        description: "Modern JavaScript features"
-      },
-      { 
-        name: "React Components", 
-        xp: 300, 
-        status: "locked",
-        description: "Build reusable React components"
-      },
-    ],
-  },
-  {
-    id: "backend", 
-    title: "Backend Path",
-    icon: "fas fa-server",
+    id: "prompting-basics",
+    title: "Prompting Fundamentals",
+    icon: "fas fa-comment-dots",
     iconColor: "text-blue-500",
     skills: [
       { 
-        name: "Node.js Basics", 
-        xp: 150, 
-        status: "completed",
-        description: "Server-side JavaScript fundamentals"
+        name: "Prompt Structure", 
+        xp: 100, 
+        status: "current",
+        description: "Learn the anatomy of effective prompts",
+        task: "Write a clear, specific prompt to get a recipe for chocolate chip cookies. Include the desired output format and any constraints.",
+        example: "Create a simple recipe for chocolate chip cookies with exactly 6 ingredients, formatted as a numbered list with prep time included."
       },
       { 
-        name: "Express.js", 
+        name: "Context Setting", 
+        xp: 150, 
+        status: "locked",
+        description: "Master the art of providing context",
+        task: "Create a prompt that sets clear context for writing a professional email to decline a job offer politely.",
+        example: "You are a professional communicator. Write a polite email declining a software engineer position at TechCorp, mentioning you've accepted another opportunity."
+      },
+      { 
+        name: "Clear Instructions", 
         xp: 200, 
         status: "locked",
-        description: "Web application framework"
+        description: "Give precise, actionable instructions",
+        task: "Write a prompt to explain quantum computing to a 10-year-old using only simple analogies and no technical jargon.",
+        example: "Explain quantum computing to a 10-year-old using only everyday objects as analogies. Keep it under 100 words and make it fun."
       },
       { 
-        name: "REST APIs", 
+        name: "Output Formatting", 
         xp: 250, 
         status: "locked",
-        description: "Building RESTful services"
-      },
-      { 
-        name: "Authentication", 
-        xp: 300, 
-        status: "locked",
-        description: "User authentication systems"
+        description: "Control how responses are structured",
+        task: "Create a prompt that generates a comparison table between cats and dogs with exactly 5 characteristics.",
+        example: "Create a comparison table between cats and dogs. Include exactly 5 characteristics: independence, energy level, grooming needs, space requirements, and training difficulty. Format as a markdown table."
       },
     ],
   },
   {
-    id: "database",
-    title: "Database Path", 
-    icon: "fas fa-database",
+    id: "advanced-techniques", 
+    title: "Advanced Techniques",
+    icon: "fas fa-brain",
     iconColor: "text-purple-500",
     skills: [
       { 
-        name: "SQL Fundamentals", 
-        xp: 100, 
-        status: "locked",
-        description: "Basic database operations"
-      },
-      { 
-        name: "Database Design", 
+        name: "Role-Based Prompting", 
         xp: 200, 
         status: "locked",
-        description: "Schema and relationship design"
+        description: "Use personas and roles for better responses",
+        task: "Create a prompt where the AI acts as a financial advisor explaining investment strategies to a college student.",
+        example: "You are an experienced financial advisor. Explain 3 basic investment strategies suitable for a college student with $500 to invest. Be encouraging and use simple terms."
       },
       { 
-        name: "Advanced Queries", 
-        xp: 250, 
-        status: "locked",
-        description: "Complex SQL operations"
-      },
-      { 
-        name: "NoSQL Databases", 
+        name: "Chain of Thought", 
         xp: 300, 
         status: "locked",
-        description: "MongoDB and document databases"
+        description: "Guide AI through step-by-step reasoning",
+        task: "Write a prompt that guides the AI through solving a math word problem step by step.",
+        example: "Solve this step by step: 'A store offers 20% off all items. If a jacket costs $80 after the discount, what was the original price?' Show each calculation step clearly."
+      },
+      { 
+        name: "Few-Shot Learning", 
+        xp: 350, 
+        status: "locked",
+        description: "Provide examples to guide responses",
+        task: "Create a prompt with 2 examples that teaches the AI to write product descriptions in a specific style.",
+        example: "Write product descriptions in this style:\n\nExample 1: Coffee Mug - 'Start your day right with this ceramic companion that holds your liquid motivation.'\n\nExample 2: Notebook - 'Capture your thoughts in this paper sanctuary where ideas come to life.'\n\nNow write a description for: Wireless Headphones"
+      },
+      { 
+        name: "Constraint Handling", 
+        xp: 400, 
+        status: "locked",
+        description: "Work within specific limitations effectively",
+        task: "Write a prompt that asks for a story in exactly 50 words with specific character and setting constraints.",
+        example: "Write a story in exactly 50 words featuring a detective, a missing cat, and a library setting. Include a plot twist and ensure the story has a complete beginning, middle, and end."
+      },
+    ],
+  },
+  {
+    id: "specialized-prompting",
+    title: "Specialized Applications", 
+    icon: "fas fa-rocket",
+    iconColor: "text-orange-500",
+    skills: [
+      { 
+        name: "Creative Writing", 
+        xp: 250, 
+        status: "locked",
+        description: "Prompts for creative and artistic content",
+        task: "Create a prompt for writing a short story that includes specific mood, setting, and style requirements.",
+        example: "Write a mysterious short story set in a 1940s jazz club. Use a noir style with descriptive language. Include a saxophone player, a secret message, and an unexpected revelation. Keep it under 300 words."
+      },
+      { 
+        name: "Data Analysis", 
+        xp: 300, 
+        status: "locked",
+        description: "Extract insights from data and information",
+        task: "Write a prompt to analyze survey data and provide actionable business insights.",
+        example: "Analyze this customer survey data: 70% want faster delivery, 45% want better packaging, 30% want lower prices. Identify the top 3 priorities and suggest specific improvements a startup should implement first."
+      },
+      { 
+        name: "Code Generation", 
+        xp: 350, 
+        status: "locked",
+        description: "Generate and explain code effectively",
+        task: "Create a prompt for generating a Python function with specific requirements and documentation.",
+        example: "Write a Python function that calculates compound interest. Include parameters for principal, rate, time, and compounding frequency. Add docstring documentation and example usage. Handle edge cases like negative values."
+      },
+      { 
+        name: "Research & Synthesis", 
+        xp: 400, 
+        status: "locked",
+        description: "Combine information from multiple sources",
+        task: "Write a prompt that synthesizes information about renewable energy trends and creates an executive summary.",
+        example: "Create an executive summary on renewable energy trends for 2024. Synthesize key points about solar, wind, and battery technology advances. Include 3 main opportunities and 2 challenges. Format for a CEO audience, max 200 words."
       },
     ],
   },
@@ -101,36 +135,36 @@ const skillTrees = [
 
 const achievements = [
   {
-    id: "first-steps",
-    title: "First Steps",
-    description: "Completed HTML basics",
+    id: "prompt-pioneer",
+    title: "Prompt Pioneer",
+    description: "Completed first prompting task",
     icon: Trophy,
     bgColor: "bg-yellow-50",
     borderColor: "border-yellow-200",
     iconColor: "text-yellow-500",
   },
   {
-    id: "code-warrior",
-    title: "Code Warrior", 
-    description: "Completed 5 challenges",
+    id: "context-master",
+    title: "Context Master", 
+    description: "Mastered context setting",
     icon: Code,
     bgColor: "bg-blue-50",
     borderColor: "border-blue-200", 
     iconColor: "text-blue-500",
   },
   {
-    id: "consistent-learner",
-    title: "Consistent Learner",
-    description: "7-day learning streak",
+    id: "consistent-prompter",
+    title: "Consistent Prompter",
+    description: "5-day prompting streak",
     icon: Clock,
     bgColor: "bg-green-50",
     borderColor: "border-green-200",
     iconColor: "text-green-500",
   },
   {
-    id: "rising-star", 
-    title: "Rising Star",
-    description: "Reached Level 5",
+    id: "ai-whisperer", 
+    title: "AI Whisperer",
+    description: "Advanced technique expert",
     icon: Star,
     bgColor: "bg-purple-50",
     borderColor: "border-purple-200",
@@ -139,6 +173,161 @@ const achievements = [
 ];
 
 export default function GamifiedLearningSection() {
+  const { user, isAuthenticated, updateUser } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedSkill, setSelectedSkill] = useState<{tree: string, skill: string} | null>(null);
+  const [userPrompt, setUserPrompt] = useState("");
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // Get user progress (now uses session-based auth)
+  const { data: userProgress = [], isError: progressError } = useQuery<UserProgress[]>({
+    queryKey: ["/api/user/progress"],
+    enabled: isAuthenticated,
+  });
+
+  // Complete task mutation
+  const completeTaskMutation = useMutation({
+    mutationFn: async (data: { skillPath: string; skillNode: string }) => {
+      const response = await apiRequest("POST", "/api/user/progress", {
+        skillPath: data.skillPath,
+        skillNode: data.skillNode,
+        completed: true,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Update user progress cache
+      queryClient.invalidateQueries({ queryKey: ["/api/user/progress"] });
+      
+      // If XP was earned, update the user data in auth context
+      if (data.user && data.earnedXP) {
+        updateUser(data.user);
+      }
+      
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 3000);
+      
+      const message = data.earnedXP 
+        ? `Great work! You've earned ${data.earnedXP} XP and unlocked new challenges.`
+        : "Great work! You've unlocked new challenges.";
+      
+      toast({
+        title: "🎉 Task Completed!",
+        description: message,
+      });
+      setSelectedSkill(null);
+      setUserPrompt("");
+    },
+    onError: (error: any) => {
+      console.error('Task completion error:', error);
+      if (error.message?.includes('Authentication required') || error.status === 401) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to save your progress.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error Completing Task",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  // Get skill status based on user progress
+  const getSkillStatus = (treeId: string, skillName: string) => {
+    const progress = userProgress.find(
+      (p) => p.skillPath === treeId && p.skillNode === skillName.toLowerCase().replace(/\s+/g, '-')
+    );
+    if (progress?.completed) return "completed";
+    
+    // Check if previous skills are completed to determine if this one is unlocked
+    const tree = skillTrees.find(t => t.id === treeId);
+    if (!tree) return "locked";
+    
+    const skillIndex = tree.skills.findIndex(s => s.name === skillName);
+    if (skillIndex === 0) return "current"; // First skill is always available
+    
+    const previousSkill = tree.skills[skillIndex - 1];
+    const prevProgress = userProgress.find(
+      (p) => p.skillPath === treeId && p.skillNode === previousSkill.name.toLowerCase().replace(/\s+/g, '-')
+    );
+    
+    return prevProgress?.completed ? "current" : "locked";
+  };
+
+  // Use XP from user object (calculated on server)
+  const totalXP = user?.xp || 0;
+
+  const completedSkills = userProgress.filter(p => p.completed).length;
+  const totalSkills = skillTrees.reduce((total, tree) => total + tree.skills.length, 0);
+  const progressPercentage = totalSkills > 0 ? (completedSkills / totalSkills) * 100 : 0;
+
+  const handleStartTask = (treeId: string, skillName: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to start learning tasks.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const status = getSkillStatus(treeId, skillName);
+    if (status === "locked") {
+      toast({
+        title: "Skill Locked",
+        description: "Complete the previous skill to unlock this one.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (status === "completed") {
+      toast({
+        title: "Already Completed",
+        description: "You've already mastered this skill!",
+      });
+      return;
+    }
+    setSelectedSkill({ tree: treeId, skill: skillName });
+  };
+
+  const handleCompleteTask = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save your progress.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!selectedSkill || !userPrompt.trim()) {
+      toast({
+        title: "Task Not Ready",
+        description: "Please write your prompt before completing the task.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    completeTaskMutation.mutate({
+      skillPath: selectedSkill.tree,
+      skillNode: selectedSkill.skill.toLowerCase().replace(/\s+/g, '-'),
+    });
+  };
+
+  const getCurrentTask = () => {
+    if (!selectedSkill) return null;
+    const tree = skillTrees.find(t => t.id === selectedSkill.tree);
+    const skill = tree?.skills.find(s => s.name === selectedSkill.skill);
+    return skill;
+  };
+
+  const currentTask = getCurrentTask();
   const getSkillIcon = (status: string) => {
     switch (status) {
       case "completed":
@@ -190,101 +379,232 @@ export default function GamifiedLearningSection() {
         </div>
 
         {/* User Progress */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-8 sm:mb-12" data-testid="user-progress">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
-            <div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Level 5 Developer</h3>
-              <p className="text-sm sm:text-base text-gray-600">1,250 XP • Next level: 500 XP to go</p>
+        <Card className="mb-8 sm:mb-12" data-testid="user-progress">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-xl sm:text-2xl">Prompt Engineer Level {user?.level || 1}</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  {totalXP} XP • {completedSkills}/{totalSkills} skills completed
+                </CardDescription>
+              </div>
+              <div className="text-left sm:text-right">
+                <div className="text-2xl sm:text-3xl text-primary font-bold">{totalXP}</div>
+                <div className="text-xs sm:text-sm text-gray-500">Total XP</div>
+              </div>
             </div>
-            <div className="text-left sm:text-right">
-              <div className="text-2xl sm:text-3xl text-primary font-bold">1,250</div>
-              <div className="text-xs sm:text-sm text-gray-500">Total XP</div>
+          </CardHeader>
+          <CardContent>
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Progress</span>
+                <span>{Math.round(progressPercentage)}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-3" />
             </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-4 sm:mb-6">
-            <div className="bg-primary h-3 rounded-full" style={{ width: "75%" }}></div>
-          </div>
 
-          {/* Achievement Badges */}
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            <div className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-2 sm:px-3 py-1 sm:py-2">
-              <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm font-medium">React Master</span>
+            {/* Achievement Badges */}
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {achievements.map((achievement) => {
+                const IconComponent = achievement.icon;
+                const earned = completedSkills >= 1; // Simple logic for now
+                return (
+                  <Badge
+                    key={achievement.id}
+                    variant={earned ? "default" : "secondary"}
+                    className={`${earned ? achievement.bgColor : "bg-gray-100"} ${earned ? achievement.borderColor : "border-gray-200"} border`}
+                  >
+                    <IconComponent className={`w-3 h-3 mr-1 ${earned ? achievement.iconColor : "text-gray-400"}`} />
+                    {achievement.title}
+                  </Badge>
+                );
+              })}
             </div>
-            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-2 sm:px-3 py-1 sm:py-2">
-              <Medal className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm font-medium">API Builder</span>
-            </div>
-            <div className="flex items-center bg-purple-50 border border-purple-200 rounded-lg px-2 sm:px-3 py-1 sm:py-2">
-              <Star className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm font-medium">Database Pro</span>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        {/* Active Task Panel */}
+        {selectedSkill && currentTask && (
+          <Card className="mb-8 border-primary/20 bg-primary/5" data-testid="active-task">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Current Task: {currentTask.name}
+              </CardTitle>
+              <CardDescription>{currentTask.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Your Challenge
+                </h4>
+                <p className="text-blue-800 text-sm">{currentTask.task}</p>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-semibold text-green-900 mb-2">Example Solution</h4>
+                <p className="text-green-800 text-sm font-mono bg-white p-2 rounded border">
+                  {currentTask.example}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Your Prompt:</label>
+                <textarea
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  placeholder="Write your prompt here..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  rows={4}
+                  data-testid="input-user-prompt"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleCompleteTask}
+                  disabled={!userPrompt.trim() || completeTaskMutation.isPending}
+                  className="flex-1"
+                  data-testid="button-complete-task"
+                >
+                  {completeTaskMutation.isPending ? "Completing..." : "Complete Task"}
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedSkill(null);
+                    setUserPrompt("");
+                  }}
+                  data-testid="button-cancel-task"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Skill Trees */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
           {skillTrees.map((tree) => (
-            <div key={tree.id} className="bg-white rounded-lg shadow-lg p-4 sm:p-6" data-testid={`skill-tree-${tree.id}`}>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 text-center">
-                <i className={`${tree.icon} ${tree.iconColor} mr-2`}></i>
-                {tree.title}
-              </h3>
-              
-              <div className="space-y-2 sm:space-y-4">
-                {tree.skills.map((skill, index) => {
-                  const styles = getSkillStyles(skill.status);
-                  return (
-                    <div key={skill.name}>
-                      <div className="skill-tree-node relative">
-                        <div 
-                          className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer ${styles.containerClass}`}
-                          data-testid={`skill-${tree.id}-${skill.name.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          <div className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.iconClass} rounded-full flex items-center justify-center mr-2 sm:mr-3`}>
-                            {getSkillIcon(skill.status)}
-                          </div>
-                          <div>
-                            <div className={`text-sm sm:text-base font-medium ${styles.textClass}`}>{skill.name}</div>
-                            <div className={`text-xs sm:text-sm ${styles.xpClass}`}>{skill.xp} XP</div>
+            <Card key={tree.id} data-testid={`skill-tree-${tree.id}`}>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl text-center">
+                  <i className={`${tree.icon} ${tree.iconColor} mr-2`}></i>
+                  {tree.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 sm:space-y-4">
+                  {tree.skills.map((skill, index) => {
+                    const status = getSkillStatus(tree.id, skill.name);
+                    const styles = getSkillStyles(status);
+                    return (
+                      <div key={skill.name}>
+                        <div className="skill-tree-node relative">
+                          <div 
+                            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all hover:shadow-md ${styles.containerClass}`}
+                            onClick={() => handleStartTask(tree.id, skill.name)}
+                            data-testid={`skill-${tree.id}-${skill.name.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            <div className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.iconClass} rounded-full flex items-center justify-center mr-2 sm:mr-3`}>
+                              {getSkillIcon(status)}
+                            </div>
+                            <div className="flex-1">
+                              <div className={`text-sm sm:text-base font-medium ${styles.textClass}`}>{skill.name}</div>
+                              <div className={`text-xs sm:text-sm ${styles.xpClass}`}>{skill.xp} XP</div>
+                            </div>
+                            {status === "current" && (
+                              <Button size="sm" variant="ghost" className="ml-2">
+                                Start
+                              </Button>
+                            )}
                           </div>
                         </div>
+                        {index < tree.skills.length - 1 && (
+                          <div className={`h-0.5 sm:h-1 w-full mx-auto rounded ${
+                            status === "completed" ? "bg-primary" : "bg-gray-200"
+                          }`}></div>
+                        )}
                       </div>
-                      {index < tree.skills.length - 1 && (
-                        <div className={`h-0.5 sm:h-1 w-full mx-auto rounded ${
-                          skill.status === "completed" ? "skill-tree-line" : "bg-gray-200"
-                        }`}></div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Recent Achievements */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8" data-testid="recent-achievements">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Recent Achievements</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-            {achievements.map((achievement) => {
-              const IconComponent = achievement.icon;
-              return (
-                <div 
-                  key={achievement.id}
-                  className={`text-center p-3 sm:p-4 ${achievement.bgColor} rounded-lg border ${achievement.borderColor}`}
-                  data-testid={`achievement-${achievement.id}`}
+        {/* Achievement Showcase */}
+        <Card data-testid="recent-achievements">
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              Your Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              {achievements.map((achievement) => {
+                const IconComponent = achievement.icon;
+                const earned = completedSkills >= 1; // Simple logic for now
+                return (
+                  <div 
+                    key={achievement.id}
+                    className={`text-center p-3 sm:p-4 rounded-lg border transition-all ${
+                      earned 
+                        ? `${achievement.bgColor} ${achievement.borderColor} shadow-sm` 
+                        : "bg-gray-50 border-gray-200 opacity-60"
+                    }`}
+                    data-testid={`achievement-${achievement.id}`}
+                  >
+                    <IconComponent 
+                      className={`mb-2 mx-auto ${earned ? achievement.iconColor : "text-gray-400"}`} 
+                      size={24} 
+                    />
+                    <h4 className={`text-sm sm:text-base font-semibold ${
+                      earned ? "text-gray-900" : "text-gray-500"
+                    }`}>
+                      {achievement.title}
+                    </h4>
+                    <p className={`text-xs sm:text-sm ${
+                      earned ? "text-gray-600" : "text-gray-400"
+                    }`}>
+                      {achievement.description}
+                    </p>
+                    {earned && (
+                      <Badge variant="secondary" className="mt-2 text-xs">
+                        Earned!
+                      </Badge>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Celebration Popup */}
+        {showCelebration && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-300">
+            <Card className="max-w-md mx-4 text-center bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+              <CardContent className="pt-6">
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-2xl font-bold text-orange-900 mb-2">Congratulations!</h2>
+                <p className="text-orange-800 mb-4">You've completed another prompting challenge!</p>
+                <Button 
+                  onClick={() => setShowCelebration(false)}
+                  className="bg-orange-500 hover:bg-orange-600"
                 >
-                  <IconComponent className={`${achievement.iconColor} mb-2 mx-auto`} size={24} />
-                  <h4 className="text-sm sm:text-base font-semibold text-gray-900">{achievement.title}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600">{achievement.description}</p>
-                </div>
-              );
-            })}
+                  Continue Learning
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

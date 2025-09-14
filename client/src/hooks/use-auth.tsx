@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  updateUser: (user: User) => void;
   isAuthenticated: boolean;
 }
 
@@ -31,15 +32,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('auth_user', JSON.stringify(userData));
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
+  const logout = async () => {
+    try {
+      // Call server logout to destroy session
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include' 
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Always clear local state
+      setUser(null);
+      localStorage.removeItem('auth_user');
+    }
+  };
+
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('auth_user', JSON.stringify(userData));
   };
 
   const value = {
     user,
     login,
     logout,
+    updateUser,
     isAuthenticated: !!user,
   };
 
