@@ -1,77 +1,6 @@
 import PromptCard from "./PromptCard";
 
 export default function PromptsSection() {
-  const htmlCode = `<!DOCTYPE html>
-<html>
-<head>
-  <title>HTML Tutorial</title>
-</head>
-<body>
-  <h1>This is a heading</h1>
-  <p>This is a paragraph.</p>
-</body>
-</html>`;
-
-  const reactCode = `import React from 'react';
-
-function App() {
-  return (
-    <div className="App">
-      <h1>Hello World!</h1>
-      <p>Welcome to React</p>
-    </div>
-  );
-}
-
-export default App;`;
-
-  const nodeCode = `const express = require('express');
-const app = express();
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});`;
-
-  const pythonCode = `from flask import Flask
-
-app = Flask(__name__)
-
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
-if __name__ == '__main__':
-    app.run(debug=True)`;
-
-  const handleLearnClick = (title: string) => {
-    console.log(`Learn ${title} clicked`);
-    // Add your learning logic here
-  };
-
-  const handleVideoClick = (title: string) => {
-    console.log(`Video Tutorial for ${title} clicked`);
-    // Add your video tutorial logic here
-  };
-
-  const handleReferenceClick = (title: string) => {
-    console.log(`${title} Reference clicked`);
-    // Add your reference logic here
-  };
-
-  const handleCertifiedClick = (title: string) => {
-    console.log(`Get Certified in ${title} clicked`);
-    // Add your certification logic here
-  };
-
-  const handleTryClick = (title: string) => {
-    console.log(`Try ${title} Yourself clicked`);
-    // Add your try it yourself logic here
-  };
-
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -86,47 +15,53 @@ if __name__ == '__main__':
 
         <div className="space-y-12">
           <PromptCard
-            title="HTML"
-            description="The language for building web pages"
-            prompt={htmlCode}
-            onLearnClick={() => handleLearnClick('HTML')}
-            onVideoClick={() => handleVideoClick('HTML')}
-            onReferenceClick={() => handleReferenceClick('HTML')}
-            onCertifiedClick={() => handleCertifiedClick('HTML')}
-            onTryClick={() => handleTryClick('HTML')}
+            title="Landing Page"
+            description="Generate a modern landing page with hero, call-to-action and testimonials."
+            prompt={`Create a responsive landing page with a large hero section, headline, subheading, and call-to-action button. Add testimonial and features section.`}
+            onLearnClick={() => console.log('Learn Landing Page clicked')}
+            onVideoClick={() => console.log('Video Tutorial for Landing Page clicked')}
+            onReferenceClick={() => console.log('Landing Page Reference clicked')}
+            onTryClick={() => console.log('Try Landing Page Yourself clicked')}
           />
 
           <PromptCard
-            title="React"
-            description="A JavaScript library for building user interfaces"
-            prompt={reactCode}
-            onLearnClick={() => handleLearnClick('React')}
-            onVideoClick={() => handleVideoClick('React')}
-            onReferenceClick={() => handleReferenceClick('React')}
-            onCertifiedClick={() => handleCertifiedClick('React')}
-            onTryClick={() => handleTryClick('React')}
+            title="Portfolio"
+            description="Showcase personal projects and skills with style."
+            prompt={`Generate a clean personal portfolio page with about section, skills grid, and project showcase cards.`}
+            onLearnClick={() => console.log('Learn Portfolio clicked')}
+            onVideoClick={() => console.log('Video Tutorial for Portfolio clicked')}
+            onReferenceClick={() => console.log('Portfolio Reference clicked')}
+            onTryClick={() => console.log('Try Portfolio Yourself clicked')}
           />
 
           <PromptCard
-            title="Node.js"
-            description="JavaScript runtime for server-side development"
-            prompt={nodeCode}
-            onLearnClick={() => handleLearnClick('Node.js')}
-            onVideoClick={() => handleVideoClick('Node.js')}
-            onReferenceClick={() => handleReferenceClick('Node.js')}
-            onCertifiedClick={() => handleCertifiedClick('Node.js')}
-            onTryClick={() => handleTryClick('Node.js')}
+            title="Blog"
+            description="Write and publish articles easily."
+            prompt={`Create a blog page layout with posts preview cards, sidebar for categories/tags, and pagination.`}
+            onLearnClick={() => console.log('Learn Blog clicked')}
+            onVideoClick={() => console.log('Video Tutorial for Blog clicked')}
+            onReferenceClick={() => console.log('Blog Reference clicked')}
+            onTryClick={() => console.log('Try Blog Yourself clicked')}
           />
 
           <PromptCard
-            title="Python"
-            description="A versatile programming language for web development"
-            prompt={pythonCode}
-            onLearnClick={() => handleLearnClick('Python')}
-            onVideoClick={() => handleVideoClick('Python')}
-            onReferenceClick={() => handleReferenceClick('Python')}
-            onCertifiedClick={() => handleCertifiedClick('Python')}
-            onTryClick={() => handleTryClick('Python')}
+            title="Contact Form"
+            description="Enable users to get in touch."
+            prompt={`Generate a contact page with form fields (name, email, message) and a submit button styled with modern UI.`}
+            onLearnClick={() => console.log('Learn Contact Form clicked')}
+            onVideoClick={() => console.log('Video Tutorial for Contact Form clicked')}
+            onReferenceClick={() => console.log('Contact Form Reference clicked')}
+            onTryClick={() => console.log('Try Contact Form Yourself clicked')}
+          />
+
+          <PromptCard
+            title="Footer"
+            description="Professional website footer."
+            prompt={`Create a footer with quick links, social icons, and copyright section.`}
+            onLearnClick={() => console.log('Learn Footer clicked')}
+            onVideoClick={() => console.log('Video Tutorial for Footer clicked')}
+            onReferenceClick={() => console.log('Footer Reference clicked')}
+            onTryClick={() => console.log('Try Footer Yourself clicked')}
           />
         </div>
       </div>

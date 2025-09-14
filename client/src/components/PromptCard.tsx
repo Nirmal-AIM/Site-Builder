@@ -5,7 +5,6 @@ interface PromptCardProps {
   onLearnClick?: () => void;
   onVideoClick?: () => void;
   onReferenceClick?: () => void;
-  onCertifiedClick?: () => void;
   onTryClick?: () => void;
 }
 
@@ -16,7 +15,6 @@ export default function PromptCard({
   onLearnClick = () => console.log('Learn clicked'),
   onVideoClick = () => console.log('Video Tutorial clicked'),
   onReferenceClick = () => console.log('Reference clicked'),
-  onCertifiedClick = () => console.log('Get Certified clicked'),
   onTryClick = () => console.log('Try it Yourself clicked')
 }: PromptCardProps) {
   return (
@@ -54,13 +52,6 @@ export default function PromptCard({
               data-testid="button-reference"
             >
               {title} Reference
-            </button>
-            <button 
-              className="bg-pink-300 hover:bg-pink-400 text-gray-800 font-semibold px-8 py-4 rounded-full transition-colors duration-200"
-              onClick={onCertifiedClick}
-              data-testid="button-certified"
-            >
-              Get Certified
             </button>
           </div>
         </div>
