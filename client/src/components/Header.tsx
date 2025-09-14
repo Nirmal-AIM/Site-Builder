@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Search, Menu, X, Code, Server, Database, GraduationCap, LogIn, UserPlus, LogOut, User } from "lucide-react";
+import { Search, Menu, X, Code, Server, Database, GraduationCap, BookOpen, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 
-type Section = "home" | "frontend" | "backend" | "database" | "learn";
+type Section = "home" | "frontend" | "backend" | "database" | "learn" | "prompts";
 
 interface HeaderProps {
   currentSection: Section;
@@ -27,9 +27,8 @@ export default function Header({
     { id: "backend" as Section, label: "Backend", icon: Server },
     { id: "database" as Section, label: "Database", icon: Database },
     { id: "learn" as Section, label: "Learn", icon: GraduationCap },
+    { id: "prompts" as Section, label: "Prompts", icon: BookOpen },
   ];
-
-  const techButtons = ["HTML", "CSS", "JAVASCRIPT", "REACT", "NODE.JS", "PYTHON", "SQL", "AI PROMPTS"];
 
   return (
     <header className="w3-dark shadow-lg sticky top-0 z-50">
@@ -141,7 +140,16 @@ export default function Header({
         {/* Secondary Navigation */}
         <div className="border-t border-slate-600 px-4 py-2 overflow-x-auto">
           <div className="flex space-x-6 text-sm">
-            {techButtons.map((tech) => (
+            {[
+              "HTML", 
+              "CSS", 
+              "JAVASCRIPT", 
+              "REACT", 
+              "NODE.JS", 
+              "PYTHON", 
+              "SQL", 
+              "AI PROMPTS"
+            ].map((tech) => (
               <button
                 key={tech}
                 className="text-gray-300 hover:text-white whitespace-nowrap py-1 transition-colors"

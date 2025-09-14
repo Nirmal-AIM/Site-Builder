@@ -1,8 +1,8 @@
-import { Search, Code, Server, Database, GraduationCap } from "lucide-react";
+import { Search, Code, Server, Database, GraduationCap, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-type Section = "home" | "frontend" | "backend" | "database" | "learn";
+type Section = "home" | "frontend" | "backend" | "database" | "learn" | "prompts";
 
 interface HeroSectionProps {
   onSectionChange: (section: Section) => void;
@@ -42,15 +42,23 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
       bgColor: "bg-green-100", 
       iconColor: "text-green-500",
     },
+    {
+      id: "prompts" as Section,
+      title: "Prompts",
+      description: "AI-powered learning with interactive code examples",
+      icon: BookOpen,
+      bgColor: "bg-indigo-100", 
+      iconColor: "text-indigo-500",
+    },
   ];
 
   return (
     <section className="w3-light-grey py-16">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            AI Website Builder
-          </h1>
+            <h1 className="text-5xl font-bold text-green-600 mb-6">
+            DON'T CODE, WEBSITES MADE FORM THE WORDS!!
+            </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             The platform for building complete websites using AI prompts. 
             From frontend to backend, learn and build with structured guidance.
@@ -88,7 +96,7 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
         </div>
 
         {/* Feature Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
           {featureCards.map((card) => {
             const IconComponent = card.icon;
             return (
