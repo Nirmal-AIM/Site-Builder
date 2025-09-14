@@ -398,7 +398,14 @@ export default function GamifiedLearningSection() {
   const [offlineAchievements, setOfflineAchievements] = useState<UserAchievement[]>([]);
   const [offlineUser, setOfflineUser] = useState<any>(null);
   const [isUsingOfflineData, setIsUsingOfflineData] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("ai-prompting");
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => {
+    // Load saved category from localStorage
+    if (typeof window !== 'undefined') {
+      const savedCategory = localStorage.getItem('selectedSkillCategory');
+      return savedCategory || "ai-prompting";
+    }
+    return "ai-prompting";
+  });
 
   // Get user progress (now uses session-based auth)
   const { data: userProgress = [], isError: progressError } = useQuery<UserProgress[]>({
@@ -459,6 +466,13 @@ export default function GamifiedLearningSection() {
       setOfflineUser(null);
     }
   }, [isAuthenticated, progressError, user]);
+
+  // Save selected category to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedSkillCategory', selectedCategory);
+    }
+  }, [selectedCategory]);
 
   // Get current skill trees for selected category
   const skillTrees = allSkillTreeCategories[selectedCategory as keyof typeof allSkillTreeCategories]?.trees || [];
