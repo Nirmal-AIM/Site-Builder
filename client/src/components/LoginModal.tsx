@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +60,9 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
       <DialogContent className="w-full max-w-md mx-4 fade-in" data-testid="modal-login">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">Sign In</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Enter your credentials to access your account
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">

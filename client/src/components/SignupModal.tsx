@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,6 +71,9 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
       <DialogContent className="w-full max-w-md mx-4 fade-in" data-testid="modal-signup">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">Sign Up</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Create a new account to start learning
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
