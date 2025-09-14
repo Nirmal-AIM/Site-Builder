@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { UserProgress } from "@shared/schema";
+import type { UserProgress, UserAchievement } from "@shared/schema";
 
 const skillTrees = [
   {
@@ -182,6 +182,12 @@ export default function GamifiedLearningSection() {
   const [earnedXP, setEarnedXP] = useState<number | null>(null);
   const [newLevel, setNewLevel] = useState<number | null>(null);
   const [showXPAnimation, setShowXPAnimation] = useState(false);
+  const [newlyUnlockedSkills, setNewlyUnlockedSkills] = useState<string[]>([]);
+  const [previousProgress, setPreviousProgress] = useState<UserProgress[]>([]);
+  const [offlineProgress, setOfflineProgress] = useState<UserProgress[]>([]);
+  const [offlineAchievements, setOfflineAchievements] = useState<UserAchievement[]>([]);
+  const [offlineUser, setOfflineUser] = useState<any>(null);
+  const [isUsingOfflineData, setIsUsingOfflineData] = useState(false);
 
   // Get user progress (now uses session-based auth)
   const { data: userProgress = [], isError: progressError } = useQuery<UserProgress[]>({
@@ -190,12 +196,12 @@ export default function GamifiedLearningSection() {
   });
 
   // Get user achievements
-  const { data: userAchievements = [] } = useQuery<any[]>({
+  const { data: userAchievements = [] } = useQuery<UserAchievement[]>({
     queryKey: ["/api/user/achievements"],
     enabled: isAuthenticated,
   });
 
-  // LocalStorage backup functionality
+  // LocalStorage backup and restore functionality
   useEffect(() => {
     if (isAuthenticated && user && userProgress.length > 0) {
       const progressBackup = {
@@ -212,6 +218,63 @@ export default function GamifiedLearningSection() {
       localStorage.setItem('skillTreeProgress', JSON.stringify(progressBackup));
     }
   }, [user, userProgress, userAchievements, isAuthenticated]);
+
+  // Restore from localStorage on load (fallback for offline)
+  useEffect(() => {
+    if (!isAuthenticated || progressError) {
+      try {
+        const backup = localStorage.getItem('skillTreeProgress');
+        if (backup) {
+          const data = JSON.parse(backup);
+          if (data.progress && data.achievements && data.user) {
+            // Verify user matches (if we have a user logged in)
+            if (!user || !user.id || user.id === data.user.id) {
+              setOfflineProgress(data.progress);
+              setOfflineAchievements(data.achievements);
+              setOfflineUser(data.user);
+              setIsUsingOfflineData(true);
+              console.log('Restored offline backup from:', data.lastSaved);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to restore from localStorage:', error);
+      }
+    } else {
+      // Clear offline data when back online
+      setIsUsingOfflineData(false);
+      setOfflineProgress([]);
+      setOfflineAchievements([]);
+      setOfflineUser(null);
+    }
+  }, [isAuthenticated, progressError, user]);
+
+  // Detect newly unlocked skills
+  useEffect(() => {
+    if (userProgress.length > 0 && previousProgress.length > 0) {
+      const newlyUnlocked: string[] = [];
+      
+      skillTrees.forEach(tree => {
+        tree.skills.forEach((skill, index) => {
+          if (index > 0) { // Skip first skill as it's always unlocked
+            const skillKey = `${tree.id}-${skill.name}`;
+            const wasLocked = getSkillStatus(tree.id, skill.name, previousProgress) === "locked";
+            const isNowUnlocked = getSkillStatus(tree.id, skill.name, userProgress) === "current";
+            
+            if (wasLocked && isNowUnlocked) {
+              newlyUnlocked.push(skillKey);
+            }
+          }
+        });
+      });
+      
+      if (newlyUnlocked.length > 0) {
+        setNewlyUnlockedSkills(newlyUnlocked);
+        setTimeout(() => setNewlyUnlockedSkills([]), 3000);
+      }
+    }
+    setPreviousProgress(userProgress);
+  }, [userProgress]);
 
   // Complete task mutation
   const completeTaskMutation = useMutation({
@@ -289,8 +352,8 @@ export default function GamifiedLearningSection() {
   });
 
   // Get skill status based on user progress
-  const getSkillStatus = (treeId: string, skillName: string) => {
-    const progress = userProgress.find(
+  const getSkillStatus = (treeId: string, skillName: string, progressData = userProgress) => {
+    const progress = progressData.find(
       (p) => p.skillPath === treeId && p.skillNode === skillName.toLowerCase().replace(/\s+/g, '-')
     );
     if (progress?.completed) return "completed";
@@ -303,17 +366,22 @@ export default function GamifiedLearningSection() {
     if (skillIndex === 0) return "current"; // First skill is always available
     
     const previousSkill = tree.skills[skillIndex - 1];
-    const prevProgress = userProgress.find(
+    const prevProgress = progressData.find(
       (p) => p.skillPath === treeId && p.skillNode === previousSkill.name.toLowerCase().replace(/\s+/g, '-')
     );
     
     return prevProgress?.completed ? "current" : "locked";
   };
 
-  // Use XP from user object (calculated on server)
-  const totalXP = user?.xp || 0;
+  // Use data from offline backup when available, otherwise server data
+  const currentProgress = isUsingOfflineData ? offlineProgress : userProgress;
+  const currentAchievements = isUsingOfflineData ? offlineAchievements : userAchievements;
+  const currentUser = isUsingOfflineData ? offlineUser : user;
 
-  const completedSkills = userProgress.filter(p => p.completed).length;
+  // Use XP from user object (calculated on server or backup)
+  const totalXP = currentUser?.xp || 0;
+
+  const completedSkills = currentProgress.filter(p => p.completed).length;
   const totalSkills = skillTrees.reduce((total, tree) => total + tree.skills.length, 0);
   const progressPercentage = totalSkills > 0 ? (completedSkills / totalSkills) * 100 : 0;
 
@@ -327,7 +395,7 @@ export default function GamifiedLearningSection() {
       return;
     }
     
-    const status = getSkillStatus(treeId, skillName);
+    const status = getSkillStatus(treeId, skillName, currentProgress);
     if (status === "locked") {
       toast({
         title: "Skill Locked",
@@ -434,9 +502,10 @@ export default function GamifiedLearningSection() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-xl sm:text-2xl">Prompt Engineer Level {user?.level || 1}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">Prompt Engineer Level {currentUser?.level || 1}</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
                   {totalXP} XP • {completedSkills}/{totalSkills} skills completed
+                  {isUsingOfflineData && <span className="text-orange-600"> (Offline)</span>}
                 </CardDescription>
               </div>
               <div className="text-left sm:text-right">
@@ -466,7 +535,7 @@ export default function GamifiedLearningSection() {
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {achievements.map((achievement) => {
                 const IconComponent = achievement.icon;
-                const earned = userAchievements.some(ua => ua.achievementId === achievement.id);
+                const earned = currentAchievements.some(ua => ua.achievementId === achievement.id);
                 return (
                   <Badge
                     key={achievement.id}
@@ -558,13 +627,15 @@ export default function GamifiedLearningSection() {
               <CardContent>
                 <div className="space-y-2 sm:space-y-4">
                   {tree.skills.map((skill, index) => {
-                    const status = getSkillStatus(tree.id, skill.name);
+                    const status = getSkillStatus(tree.id, skill.name, currentProgress);
                     const styles = getSkillStyles(status);
+                    const skillKey = `${tree.id}-${skill.name}`;
+                    const isNewlyUnlocked = newlyUnlockedSkills.includes(skillKey);
                     return (
                       <div key={skill.name}>
                         <div className="skill-tree-node relative">
                           <div 
-                            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-105 ${styles.containerClass}`}
+                            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-105 ${styles.containerClass} ${isNewlyUnlocked ? 'animate-pulse ring-2 ring-primary ring-opacity-75' : ''}`}
                             onClick={() => handleStartTask(tree.id, skill.name)}
                             data-testid={`skill-${tree.id}-${skill.name.toLowerCase().replace(/\s+/g, '-')}`}
                           >
@@ -608,7 +679,7 @@ export default function GamifiedLearningSection() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {achievements.map((achievement) => {
                 const IconComponent = achievement.icon;
-                const earned = userAchievements.some(ua => ua.achievementId === achievement.id);
+                const earned = currentAchievements.some(ua => ua.achievementId === achievement.id);
                 return (
                   <div 
                     key={achievement.id}
@@ -647,7 +718,7 @@ export default function GamifiedLearningSection() {
 
         {/* Celebration Popup */}
         {showCelebration && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-300" data-testid="celebration-popup">
             <Card className="max-w-md mx-4 text-center bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 animate-in zoom-in duration-500">
               <CardContent className="pt-6">
                 <div className="text-6xl mb-4 animate-bounce">
