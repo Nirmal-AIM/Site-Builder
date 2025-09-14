@@ -43,7 +43,7 @@ export default function Header({
               data-testid="button-logo"
             >
               <i className="fas fa-code text-primary mr-2"></i>
-              AI Builder
+              Prompty
             </button>
           </div>
 

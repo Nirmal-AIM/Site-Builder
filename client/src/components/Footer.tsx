@@ -36,7 +36,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">AI Builder</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Prompty</h3>
             <p className="text-gray-300 text-sm mb-4">
               The ultimate platform for building websites with AI assistance.
             </p>
@@ -87,7 +87,7 @@ export default function Footer() {
         
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="text-gray-300 text-sm">
-            &copy; 2024 AI Builder. All rights reserved.
+            &copy; 2025 Prompty. All rights reserved.
           </p>
         </div>
       </div>
