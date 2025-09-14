@@ -179,6 +179,9 @@ export default function GamifiedLearningSection() {
   const [selectedSkill, setSelectedSkill] = useState<{tree: string, skill: string} | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
   const [showCelebration, setShowCelebration] = useState(false);
+  const [earnedXP, setEarnedXP] = useState<number | null>(null);
+  const [newLevel, setNewLevel] = useState<number | null>(null);
+  const [showXPAnimation, setShowXPAnimation] = useState(false);
 
   // Get user progress (now uses session-based auth)
   const { data: userProgress = [], isError: progressError } = useQuery<UserProgress[]>({
@@ -191,6 +194,24 @@ export default function GamifiedLearningSection() {
     queryKey: ["/api/user/achievements"],
     enabled: isAuthenticated,
   });
+
+  // LocalStorage backup functionality
+  useEffect(() => {
+    if (isAuthenticated && user && userProgress.length > 0) {
+      const progressBackup = {
+        user: {
+          id: user.id,
+          level: user.level,
+          xp: user.xp,
+          name: user.name,
+        },
+        progress: userProgress,
+        achievements: userAchievements,
+        lastSaved: new Date().toISOString(),
+      };
+      localStorage.setItem('skillTreeProgress', JSON.stringify(progressBackup));
+    }
+  }, [user, userProgress, userAchievements, isAuthenticated]);
 
   // Complete task mutation
   const completeTaskMutation = useMutation({
@@ -209,19 +230,32 @@ export default function GamifiedLearningSection() {
       
       // If XP was earned, update the user data in auth context
       if (data.user && data.earnedXP) {
+        const oldLevel = user?.level || 1;
         updateUser(data.user);
+        
+        // Check for level up
+        if (data.user.level > oldLevel) {
+          setNewLevel(data.user.level);
+        }
+        
+        // Set earned XP for animation
+        setEarnedXP(data.earnedXP);
+        setShowXPAnimation(true);
+        setTimeout(() => setShowXPAnimation(false), 2000);
       }
       
       setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 3000);
+      setTimeout(() => setShowCelebration(false), 4000);
       
       // Show achievement notifications
       if (data.newAchievements && data.newAchievements.length > 0) {
-        data.newAchievements.forEach((achievement: any) => {
-          toast({
-            title: `🏆 Achievement Unlocked!`,
-            description: `${achievement.title}: ${achievement.description}`,
-          });
+        data.newAchievements.forEach((achievement: any, index: number) => {
+          setTimeout(() => {
+            toast({
+              title: `🏆 Achievement Unlocked!`,
+              description: `${achievement.title}: ${achievement.description}`,
+            });
+          }, index * 1000); // Stagger achievement notifications
         });
       }
       
@@ -414,11 +448,18 @@ export default function GamifiedLearningSection() {
           <CardContent>
             {/* Progress Bar */}
             <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
                 <span>Progress</span>
-                <span>{Math.round(progressPercentage)}%</span>
+                <div className="flex items-center gap-2">
+                  <span>{Math.round(progressPercentage)}%</span>
+                  {showXPAnimation && earnedXP && (
+                    <span className="text-green-500 font-bold animate-bounce">
+                      +{earnedXP} XP!
+                    </span>
+                  )}
+                </div>
               </div>
-              <Progress value={progressPercentage} className="h-3" />
+              <Progress value={progressPercentage} className="h-3 transition-all duration-1000 ease-out" />
             </div>
 
             {/* Achievement Badges */}
@@ -523,7 +564,7 @@ export default function GamifiedLearningSection() {
                       <div key={skill.name}>
                         <div className="skill-tree-node relative">
                           <div 
-                            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all hover:shadow-md ${styles.containerClass}`}
+                            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-105 ${styles.containerClass}`}
                             onClick={() => handleStartTask(tree.id, skill.name)}
                             data-testid={`skill-${tree.id}-${skill.name.toLowerCase().replace(/\s+/g, '-')}`}
                           >
@@ -567,7 +608,7 @@ export default function GamifiedLearningSection() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {achievements.map((achievement) => {
                 const IconComponent = achievement.icon;
-                const earned = completedSkills >= 1; // Simple logic for now
+                const earned = userAchievements.some(ua => ua.achievementId === achievement.id);
                 return (
                   <div 
                     key={achievement.id}
@@ -607,14 +648,35 @@ export default function GamifiedLearningSection() {
         {/* Celebration Popup */}
         {showCelebration && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-300">
-            <Card className="max-w-md mx-4 text-center bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+            <Card className="max-w-md mx-4 text-center bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 animate-in zoom-in duration-500">
               <CardContent className="pt-6">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-orange-900 mb-2">Congratulations!</h2>
-                <p className="text-orange-800 mb-4">You've completed another prompting challenge!</p>
+                <div className="text-6xl mb-4 animate-bounce">
+                  {newLevel ? "🎊" : "🎉"}
+                </div>
+                {newLevel && (
+                  <div className="mb-4">
+                    <div className="text-4xl font-bold text-purple-600 animate-pulse">
+                      LEVEL UP!
+                    </div>
+                    <div className="text-lg text-purple-700">
+                      You reached Level {newLevel}!
+                    </div>
+                  </div>
+                )}
+                <h2 className="text-2xl font-bold text-orange-900 mb-2">
+                  {newLevel ? "Outstanding Achievement!" : "Congratulations!"}
+                </h2>
+                <p className="text-orange-800 mb-4">
+                  {earnedXP ? `You've earned ${earnedXP} XP and ` : "You've "}
+                  completed another prompting challenge!
+                </p>
                 <Button 
-                  onClick={() => setShowCelebration(false)}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => {
+                    setShowCelebration(false);
+                    setNewLevel(null);
+                    setEarnedXP(null);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 transform hover:scale-105 transition-transform"
                 >
                   Continue Learning
                 </Button>
